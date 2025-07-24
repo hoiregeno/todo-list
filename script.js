@@ -1,61 +1,67 @@
-// Grab the input and ul element from index.html
 const inputBox = document.getElementById("input-box");
 const listContainer = document.getElementById("list-container");
 
-// Add events to inputBox and listContainer.
-inputBox.addEventListener("keypress", addTask); // Listens for key press
-listContainer.addEventListener("click", checkTask);
-listContainer.addEventListener("contextmenu", deleteTask); // Listens for right click
+// Event listeners
+inputBox.addEventListener("keypress", addTask);
+listContainer.addEventListener("click", toggleTask);
+listContainer.addEventListener("contextmenu", deleteTask);
 
-// Adds a new task to the list.
-function addTask(event){
-  if(event.key === "Enter") {
-    if(inputBox.value === "") {
-      alert("Please enter something.");	// displays an error message if user enters nothing.
-      return; // Exit function. Do nothing.
+// Add a new task
+function addTask(event) {
+  if (event.key === "Enter") {
+    const text = inputBox.value.trim();
+
+    if (!text) {
+      alert("Please enter something.");
+      return;
     }
 
-    let li = document.createElement("li"); // if user entered something, create an 'li' element to the DOM.
-    li.innerHTML = inputBox.value;         // set the text content to whatever the user entered.
-    listContainer.appendChild(li);	       // adds the li element to the listContainer.
-
-    inputBox.value = "";	// resets the input field.
-    saveTask();	// update the list after task is entered.
+    createTaskElement(text);
+    saveTasks();
+    inputBox.value = "";
   }
 }
 
-// Marks a task as complete when user left clicks mouse.
-function checkTask(event){
-  const task = event.target; // Grab the task and store it in a variable so we can reuse it.
-
-  if(task.tagName === "LI") {
-    task.classList.toggle("checked");
-    saveTask();	// update the list when task is marked.
+// Toggle completed task
+function toggleTask(event) {
+  if (event.target.tagName === "LI") {
+    event.target.classList.toggle("checked");
+    saveTasks();
   }
 }
 
-// Deletes a task when user right clicks mouse.
-function deleteTask(event){
-  event.preventDefault(); // Prevents context menu from popping up.
-
-  const task = event.target; // Grab the task and store it in a variable so we can reuse it.
-  if(task.tagName === "LI") {
-    task.remove(); // if the tag name is LI. Remove it from the DOM.
-    saveTask();    // update the list when task is deleted.
-}
-}
-
-// Saves the list to local storage. Helps us update the list.
-function saveTask() {
-  localStorage.setItem("tasks", listContainer.innerHTML);
-}
-
-// Loads the list to the browser.
-function loadTask() {
-  const tasks = localStorage.getItem("tasks");
-  if(tasks){
-    listContainer.innerHTML = tasks;
+// Delete task on right-click
+function deleteTask(event) {
+  event.preventDefault();
+  if (event.target.tagName === "LI") {
+    event.target.remove();
+    saveTasks();
   }
 }
 
-loadTask();	// Load the updated list right away.
+// Create a list item element
+function createTaskElement(text, done = false) {
+  const li = document.createElement("li");
+  li.textContent = text;
+  if (done) li.classList.add("checked");
+  listContainer.appendChild(li);
+}
+
+// Save tasks as JSON
+function saveTasks() {
+  const tasks = [...listContainer.querySelectorAll("li")].map(li => ({
+    text: li.textContent,
+    done: li.classList.contains("checked"),
+  }));
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+// Load tasks from JSON
+function loadTasks() {
+  const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+  listContainer.innerHTML = "";
+  tasks.forEach(task => createTaskElement(task.text, task.done));
+}
+
+loadTasks();
