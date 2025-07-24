@@ -1,49 +1,50 @@
+// Grab the input and ul element from index.html
 const inputBox = document.getElementById("input-box");
 const listContainer = document.getElementById("list-container");
 
-// this is for the INPUT FIELD.
+// Add an event listener to the input box.
 inputBox.addEventListener("keypress", function(event) {
 	if(event.key === "Enter") {
-		// if input field is empty...
 		if(inputBox.value === "") {
-			alert("Please enter something.");	// displays a warning.
+			alert("Please enter something.");	// displays an error message if user enters nothing.
 		}
 		else {
-			// if input is filled in, an 'li' element is created.
-			let li = document.createElement("li");
-			li.innerHTML = inputBox.value;
-			listContainer.appendChild(li);	// adds the list.
-			saveTask();	// SAVES THE LIST.
+			let li = document.createElement("li"); // if user entered something, create an 'li' element to the DOM.
+			li.innerHTML = inputBox.value;  // set the text content to whatever the user entered.
+			listContainer.appendChild(li);	// adds the li element to the listContainer.
+
+			saveTask();	// save the list to local storage after task is entered.
 		}
 		inputBox.value = "";	// resets the input field.
 	}
 });
 
-// EVENT LISTENER FOR LEFT CLICK.
+// Marks a task as complete when user left clicks mouse.
 listContainer.addEventListener("click", function(event) {
 	if(event.target.tagName === "LI") {
 		event.target.classList.toggle("checked");
-		saveTask();	// SAVES THE LIST.
+		saveTask();	// save the list to local storage when task is marked.
 	}
 });
 
-// EVENT LISTENER FOR RIGHT CLICK.
+// Deletes a task when user right clicks mouse.
 listContainer.addEventListener("contextmenu", function(event) {
-	event.preventDefault();
+	event.preventDefault(); // Prevents context menu from popping up.
+  
 	if(event.target.tagName === "LI") {
-		event.target.remove();
-		saveTask();	// SAVES THE LIST.
+		event.target.remove(); // if the tag name is LI. Remove it from the DOM.
+		saveTask();            // save the list to local storage when task is deleted.
 	}
 });
 
-// function to SAVE THE LISTS TO LOCAL STORAGE.
+// Saves the list to local storage.
 function saveTask() {
 	localStorage.setItem("tasks", listContainer.innerHTML);
 }
 
-// function to LOAD THE LISTS TO THE WEB BROWSER.
+// Loads the list to the browser.
 function loadTask() {
 	listContainer.innerHTML = localStorage.getItem("tasks");
 }
 
-loadTask();	// invoke the function.
+loadTask();	// Loading the saved list right away when app begins.
